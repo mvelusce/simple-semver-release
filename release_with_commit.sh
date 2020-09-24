@@ -44,11 +44,6 @@ if [ -z "$next_version" ]; then
     exit 1
 fi
 
-echo "Creating new tag"
-git tag "v$next_version"
-echo "Pushing tag to origin"
-git push origin --tags
-
 export PROG_VERSION=$next_version
 
 echo "Building"
@@ -57,3 +52,18 @@ sh build.sh || { echo 'build failed' ; exit 1; }
 echo "Create release notes"
 echo "# Release v$next_version\n\n## Changes:\n" > release-notes.md
 git log -1 --pretty=oneline --abbrev-commit >> release-notes.md
+
+echo "Release commit"
+git config --global user.email "marco.veluscek@skytv.it"
+git config --global user.name "Marco Veluscek"
+
+git add --all
+git commit -m "Release: v$next_version" || { echo 'release commit failed' ; exit 1; }
+
+echo "Pushing commit to origin"
+git push origin master || { echo 'push failed' ; exit 1; }
+
+echo "Creating new tag"
+git tag "v$next_version"
+echo "Pushing tag to origin"
+git push origin --tags || { echo 'tag push failed' ; exit 1; }
